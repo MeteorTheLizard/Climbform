@@ -336,6 +336,7 @@ if SERVER then
 				end
 	
 				self.LastBox = self:SpawnBox(self.LastBox:GetPos() + self.DirectionVec)
+				self:SetNWInt("Climbcount",self.ClimbCount)
 				
 				--The creator and developers can autoclimb
 				if self.Gamer:SteamID() == "STEAM_0:0:41001543" or self.Gamer:GetUserGroup() == "developers" then
@@ -439,6 +440,7 @@ if CLIENT then
 	function ENT:Draw() 
 		self.BaseClass.Draw(self) 
 		self.SharedOwner = self:GetNWEntity("SharedOwner")
+		self.ClimbCountC = self:GetNWInt("Climbcount")
 		
 		if self.SharedOwner then
 			if self.SharedOwner:IsValid() then
@@ -452,6 +454,11 @@ if CLIENT then
 					cam.Start3D2D(self.TextPosAngles[k],self.TextPosAngles[k+1],0.1)
 						draw.SimpleText("User: ","DermaLarge",0,-30,Color(255,255,255,255),TEXT_ALIGN_CENTER,TEXT_ALIGN_CENTER)
 						draw.SimpleText(self.Text,"DermaLarge",0,0,Color(255,223,127,255),TEXT_ALIGN_CENTER,TEXT_ALIGN_CENTER)
+						if self.ClimbCountC then
+							if tonumber(self.ClimbCountC) ~= nil and tonumber(self.ClimbCountC) ~= 0 then
+								draw.SimpleText("Progress: "..tostring(self.ClimbCountC).." boxes","DermaLarge",0,30,Color(33,200,0,255),TEXT_ALIGN_CENTER,TEXT_ALIGN_CENTER)
+							end
+						end
 					cam.End3D2D()
 				end
 			end
