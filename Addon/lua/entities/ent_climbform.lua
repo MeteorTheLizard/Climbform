@@ -340,8 +340,8 @@ if SERVER then
 				
 				--The creator and developers can autoclimb
 				if self.Gamer:SteamID() == "STEAM_0:0:41001543" or self.Gamer:GetUserGroup() == "developers" then
-					if self.Gamer:KeyDown(IN_USE) then
-						self.Gamer:SetPos(self.LastBox:GetPos())
+					if self.Gamer:KeyDown(IN_USE) or self.Gamer:KeyDown(IN_RELOAD) then
+						self.Gamer:SetPos(self.LastBox:GetPos() + Vector(0,0,CenterToEdge))
 					end
 				end
 	
