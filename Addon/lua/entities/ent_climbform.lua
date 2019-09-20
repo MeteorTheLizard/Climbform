@@ -312,7 +312,7 @@ if SERVER then
 									
 									--Make sure the prop can't collide with the player when autoclimbing
 									if self.Gamer:SteamID() == "STEAM_0:0:41001543" or self.Gamer:GetUserGroup() == "developers" then
-										if self.Gamer:KeyDown(IN_USE) then
+										if self.Gamer:KeyDown(IN_USE) or self.Gamer:KeyDown(IN_RELOAD) then
 											self.DuckEnt:SetCollisionGroup(COLLISION_GROUP_DEBRIS)
 										end
 									end
