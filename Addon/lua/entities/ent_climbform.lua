@@ -3,8 +3,8 @@
 --Shared
 AddCSLuaFile()
 
-ENT.Base 				= "base_gmodentity"
-ENT.Type 				= "anim"
+ENT.Base				= "base_gmodentity"
+ENT.Type				= "anim"
  
 ENT.PrintName			= "Climbgame"
 ENT.Category			= "Fun + Games"
@@ -12,13 +12,13 @@ ENT.Author				= "MrRangerLP"
 ENT.Contact				= ""
 ENT.Purpose				= ""
 ENT.Instructions		= ""
-ENT.Spawnable 			= true
-ENT.AdminOnly 			= false
-ENT.DisableDuplicator 	= true
+ENT.Spawnable			= true
+ENT.AdminOnly			= false
+ENT.DisableDuplicator	= true
 	
 if SERVER then
-	resource.AddFile("materials/vgui/entities/ent_climbform.vmt") --Make sure people download the spawnmenu icon
-	resource.AddFile("materials/vgui/entities/ent_climbform.vtf") --Make sure people download the spawnmenu icon
+	resource.AddFile("materials/vgui/entities/ent_climbform.vmt")
+	resource.AddFile("materials/vgui/entities/ent_climbform.vtf")
 	
 	function ENT:Initialize()
 		self:SetModel("models/props_junk/wood_crate001a.mdl")
@@ -48,6 +48,17 @@ if SERVER then
 		self.Grenade = nil
 		self.Headcrabs = { }
 		self.DuckEnt = nil
+		
+		self.IdleTime = CurTime()
+		self.MotivationalSounds = {
+			"vo/eli_lab/al_buildastack.wav",
+			"vo/eli_lab/al_giveittry.wav",
+			"vo/eli_lab/al_havefun.wav",
+			"vo/k_lab/al_letsdoit.wav",
+			"vo/k_lab/al_moveon01.wav",
+			"vo/k_lab/al_moveon02.wav",
+			"vo/k_lab/ba_pissinmeoff.wav",
+		}
 		
 		self.TraceCenterToEdge = (self.CenterToEdge + 8)
 		self.StepCenterToEdge = (self.CenterToEdge - 10)
@@ -86,41 +97,6 @@ if SERVER then
 			Vector(self.StepCenterToEdge,0,self.StepCenterToEdgeUp),Vector(0,-self.StepCenterToEdge,self.StepCenterToEdgeUp),
 			Vector(self.StepCenterToEdge,0,self.StepCenterToEdgeUp),Vector(0,self.StepCenterToEdge,self.StepCenterToEdgeUp),
 		}
-		
-		hook.Add("EntityTakeDamage","BoxesNoDamage"..self:EntIndex(),function(Ent,Info)
-			if table.HasValue(self.BoxTable,Ent) then
-				return true
-			end
-		end)
-		hook.Add("PhysgunPickup","BoxesNoPickup"..self:EntIndex(),function(Ply,Ent)
-			if Ent == self and tostring(self:GetNWEntity("SharedOwner")) ~= "[NULL Entity]" then
-				return false
-			end
-			
-			if table.HasValue(self.BoxTable,Ent) then
-				return false
-			end
-		end)
-		hook.Add("CanPlayerUnfreeze","BoxesNoUnfreeze"..self:EntIndex(),function(Ply,Ent,Obj)
-			if Ent == self and tostring(self:GetNWEntity("SharedOwner")) ~= "[NULL Entity]" then
-				return false
-			end
-			if table.HasValue(self.BoxTable,Ent) then
-				return false
-			end
-		end)
-		hook.Add("CanTool","BoxesNoToolgun"..self:EntIndex(),function(Ply,Trace,Tool)
-			if Trace.Entity then
-				if Trace.Entity:IsValid() then
-					if Trace.Entity == self and tostring(self:GetNWEntity("SharedOwner")) ~= "[NULL Entity]" then
-						return false
-					end
-					if table.HasValue(self.BoxTable,Trace.Entity) then
-						return false
-					end
-				end
-			end
-		end)
 	end
 	
 	function ENT:CheckBoundaries(NewDirVec,Type)
@@ -174,10 +150,6 @@ if SERVER then
 	end
 
 	function ENT:OnRemove()
-		hook.Remove("EntityTakeDamage","BoxesNoDamage"..self:EntIndex())
-		hook.Remove("PhysgunPickup","BoxesNoPickup"..self:EntIndex())
-		hook.Remove("CanPlayerUnfreeze","BoxesNoUnfreeze"..self:EntIndex())
-		hook.Remove("CanTool","BoxesNoToolgun"..self:EntIndex())
 		for k,v in pairs(self.BoxTable) do
 			if v:IsValid() then v:Remove() end
 		end
@@ -193,19 +165,21 @@ if SERVER then
 			if self.DuckEnt:IsValid() then
 				self.DuckEnt:Remove()
 			end
-		end; self:Remove()
+		end
+		self:EmitSound("physics/wood/wood_crate_break"..math.random(1,5)..".wav",75,100,1,CHAN_AUTO)
+		self:Remove()
 	end
 	
 	function ENT:CallError()
-		self:SafeEmitSound("vo/npc/barney/ba_no02.wav",75,100,1,CHAN_AUTO)
+		self:SafeEmitSound("vo/k_lab/kl_ohdear.wav",75,100,1,CHAN_AUTO)
 		self:OnRemove()
 	end
 	
 	function ENT:SpawnBox(Pos)
-		local Box = ents.Create("prop_physics")
-		Box:SetModel("models/props_junk/wood_crate001a.mdl")
+		local Box = ents.Create("ent_climbform_box")
 		Box:SetPos(Pos)
 		Box:SetAngles(Angle(0,0,0))
+		Box.Owner = self.Gamer
 		Box:Spawn()
 
 		if Box:IsValid() then
@@ -214,7 +188,7 @@ if SERVER then
 				phys:EnableMotion(false)
 				
 				Box:EmitSound("physics/wood/wood_box_impact_hard"..math.random(1,3)..".wav",75,100,1,CHAN_AUTO)
-				if #self.BoxTable >= 10 then --Make sure there aren't 10 million boxes on the map.
+				if #self.BoxTable >= 10 then
 					if self.BoxTable[1]:IsValid() then
 						self.BoxTable[1]:Remove()
 						table.remove(self.BoxTable,1)
@@ -223,6 +197,8 @@ if SERVER then
 			else
 				self:CallError()
 			end
+		else
+			self:CallError()
 		end
 	end
 	
@@ -265,14 +241,12 @@ if SERVER then
 				
 				self.ClimbCount = (self.ClimbCount + 1)
 				if self.ClimbCount == 1 then self:SafeEmitSound("vo/npc/barney/ba_letsdoit.wav",90,100,1,CHAN_AUTO) end
-				--if self.ClimbCount == 20 then self:SafeEmitSound("vo/npc/alyx/al_car_catchup02.wav",90,100,1,CHAN_AUTO) end
-				--if self.ClimbCount == 30 then self:SafeEmitSound("vo/npc/alyx/al_car_catchup04.wav",90,100,1,CHAN_AUTO) end
-				
-				--Color every 10th box
-				--if self.ClimbCount % 10 == 0 then self.LastBox:SetColor(Color(255,0,255)) end
-				
+				if self.ClimbCount == 10 then self:SafeEmitSound("vo/eli_lab/al_allright01.wav",90,100,1,CHAN_AUTO) end
+				if self.ClimbCount == 20 then self:SafeEmitSound("vo/eli_lab/al_awesome.wav",90,100,1,CHAN_AUTO) end
+				if self.ClimbCount == 50 then self:SafeEmitSound("vo/eli_lab/al_sweet.wav",90,100,1,CHAN_AUTO) end
+
 				--Random Events
-				local HeadcrabBitch = false
+				local HeadcrabBool = false
 				if self.ClimbCount % 5 == 0 and self.ClimbCount % 10 ~= 0 and self.ClimbCount > 15 then
 					local RandN = math.random(1,100)
 					if RandN > 60 then
@@ -287,8 +261,8 @@ if SERVER then
 							
 						elseif RandNE == 2 then -- Headcrab event
 							self:SafeEmitSound("vo/npc/barney/ba_headhumpers.wav",75,100,1,CHAN_AUTO)
-							HeadcrabBitch = true
-						elseif RandNE == 3 then -- Flying Container event
+							HeadcrabBool = true
+						elseif RandNE == 3 then -- Flying WashingMachine event
 							self:SafeEmitSound("vo/npc/barney/ba_duck.wav",90,100,1,CHAN_AUTO)        
 							timer.Simple(3,function()
 								if self.DuckEnt then
@@ -341,11 +315,13 @@ if SERVER then
 				--The creator and developers can autoclimb
 				if self.Gamer:SteamID() == "STEAM_0:0:41001543" or self.Gamer:GetUserGroup() == "developers" then
 					if self.Gamer:KeyDown(IN_USE) or self.Gamer:KeyDown(IN_RELOAD) then
-						self.Gamer:SetPos(self.LastBox:GetPos() + Vector(0,0,CenterToEdge))
+						timer.Simple(0.1,function()
+							self.Gamer:SetPos(self.LastBox:GetPos() + Vector(0,0,CenterToEdge))
+						end) --For some reason this has to run in a timer or else the setpos won't work sometimes.
 					end
 				end
 	
-				if HeadcrabBitch then
+				if HeadcrabBool then
 					local Headcrab = ents.Create("npc_headcrab")
 					Headcrab:SetPos(self.LastBox:GetPos() + Vector(0,0,self.CenterToEdge+10))
 					Headcrab:Spawn()
@@ -395,20 +371,25 @@ if SERVER then
 							if #self.BoxTable <= 1 then self:OnRemove(); return end
 							if self.BoxTable[#self.BoxTable] == nil then return end
 							if !self.BoxTable[#self.BoxTable]:IsValid() then return end
-						
-							self.BoxTable[#self.BoxTable]:Fire("break")
+
+							self.BoxTable[#self.BoxTable]:Remove()
 							table.remove(self.BoxTable,#self.BoxTable)
 						end)
 					end
 				end
             end
-        end
+        else
+			if CurTime() > (self.IdleTime + 30) then
+				self:EmitSound(self.MotivationalSounds[math.random(1,#self.MotivationalSounds)],75,100,1,CHAN_AUTO)
+				self.IdleTime = CurTime()
+			end
+		end
         
         if !self.Fell then
 			if self.Gamer == nil then
 				for k,v in pairs(ents.FindInSphere((self.LastBox:GetPos() + Vector(0,0,19)),1)) do
 					if v:IsPlayer() then
-						self:SetNWEntity("SharedOwner",v) --Cheap but effective way to network the user.
+						self:SetNWEntity("SharedOwner",v)
 						self.Gamer = v; break
 					end
 				end
@@ -426,44 +407,58 @@ if SERVER then
 end
 
 if CLIENT then
-	function ENT:Initialize() 
+	function ENT:TextPosInit()
 		self.TextPosAngles = {
 			(self.Entity:GetPos() + (self.Entity:GetUp() * 1) + (self.Entity:GetForward() * -21)),(self.Entity:GetAngles() + Angle(-180,90,-90)),
 			(self.Entity:GetPos() + (self.Entity:GetUp() * 1) + (self.Entity:GetForward() * 21)),(self.Entity:GetAngles() + Angle(-180,-90,-90)),
 			(self.Entity:GetPos() + (self.Entity:GetUp() * 1) + (self.Entity:GetRight() * -21)),(self.Entity:GetAngles() + Angle(0,-180,90)),
 			(self.Entity:GetPos() + (self.Entity:GetUp() * 1) + (self.Entity:GetRight() * 21)),(self.Entity:GetAngles() + Angle(0,0,90))
 		}
-		
-		self.ClimbcountAnnounced = false
 	end
+	
+	function ENT:Initialize()
+		self:TextPosInit()
+		self.ClimbcountAnnounced = false
+		self.Text = "Climbgame"
+	end
+	
 	function ENT:OnRemove() end
+	
 	function ENT:Draw() 
 		self.BaseClass.Draw(self) 
 		self.SharedOwner = self:GetNWEntity("SharedOwner")
 		self.ClimbCountC = self:GetNWInt("Climbcount")
-		
-		if self.SharedOwner then
-			if self.SharedOwner:IsValid() then
-				for k = 1,#self.TextPosAngles,2 do
-					if gmod.GetGamemode().Name == "QBox" then --Metastruct Compatibility
-						self.Text = UndecorateNick(self.SharedOwner:Nick())
-					else
-						self.Text = self.SharedOwner:Nick()
-					end
-					
-					cam.Start3D2D(self.TextPosAngles[k],self.TextPosAngles[k+1],0.1)
-						draw.SimpleText("User: ","DermaLarge",0,-30,Color(255,255,255,255),TEXT_ALIGN_CENTER,TEXT_ALIGN_CENTER)
-						draw.SimpleText(self.Text,"DermaLarge",0,0,Color(255,223,127,255),TEXT_ALIGN_CENTER,TEXT_ALIGN_CENTER)
-						if self.ClimbCountC then
-							if tonumber(self.ClimbCountC) ~= nil and tonumber(self.ClimbCountC) ~= 0 then
-								draw.SimpleText("Progress: "..tostring(self.ClimbCountC).." boxes","DermaLarge",0,30,Color(33,200,0,255),TEXT_ALIGN_CENTER,TEXT_ALIGN_CENTER)
-							end
-						end
-					cam.End3D2D()
+
+		for k = 1,#self.TextPosAngles,2 do
+			cam.Start3D2D(self.TextPosAngles[k],self.TextPosAngles[k+1],0.1)
+				if self.TextPosAngles[1] ~= (self.Entity:GetPos() + (self.Entity:GetUp() * 1) + (self.Entity:GetForward() * -21)) then --Update the table when the box is moved.
+					self:TextPosInit()
 				end
-			end
+			
+				if self.SharedOwner then
+					if self.SharedOwner:IsValid() then
+						if UndecorateNick then --Metastruct Compatibility
+							self.Text = UndecorateNick(self.SharedOwner:Nick())
+						else
+							self.Text = self.SharedOwner:Nick()
+						end
+						
+						draw.SimpleText("User: ","DermaLarge",0,-30,Color(255,255,255,255),TEXT_ALIGN_CENTER,TEXT_ALIGN_CENTER)
+					end
+				end
+
+				draw.SimpleText(self.Text,"DermaLarge",0,0,Color(255,223,127,255),TEXT_ALIGN_CENTER,TEXT_ALIGN_CENTER)
+				
+				if self.ClimbCountC then
+					if tonumber(self.ClimbCountC) ~= nil and tonumber(self.ClimbCountC) ~= 0 then
+						local DynText = "box"; if self.ClimbCountC > 1 then DynText = "boxes" end
+						draw.SimpleText("Progress: "..tostring(self.ClimbCountC).." "..DynText,"DermaLarge",0,30,Color(33,200,0,255),TEXT_ALIGN_CENTER,TEXT_ALIGN_CENTER)
+					end
+				end
+			cam.End3D2D()
 		end
 	end
+	
 	function ENT:Think()
 		if self.SharedOwner then
 			if self.SharedOwner:IsValid() then
