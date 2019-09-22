@@ -30,7 +30,7 @@ if SERVER then
 			phys:EnableMotion(false)
 		end
 		
-		if CPPISetOwner then
+		if FindMetaTable("Entity").CPPISetOwner then
 			if self.Owner then
 				if self.Owner:IsValid() then
 					self:CPPISetOwner(self.Owner)
