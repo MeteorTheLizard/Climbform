@@ -60,6 +60,14 @@ if SERVER then
 			"vo/k_lab/ba_pissinmeoff.wav",
 		}
 		
+		self.CPPIExists = false
+		local meta = FindMetaTable("Entity")
+		if meta then
+			if meta.CPPISetOwner then
+				self.CPPIExists = true
+			end
+		end
+		
 		self.TraceCenterToEdge = (self.CenterToEdge + 8)
 		self.StepCenterToEdge = (self.CenterToEdge - 10)
 		self.StepCenterToEdgeUp = (self.CenterToEdge + 1)
@@ -180,6 +188,7 @@ if SERVER then
 		Box:SetPos(Pos)
 		Box:SetAngles(Angle(0,0,0))
 		Box.Owner = self.Gamer
+		Box.CPPIExists = self.CPPIExists
 		Box:Spawn()
 
 		if Box:IsValid() then
