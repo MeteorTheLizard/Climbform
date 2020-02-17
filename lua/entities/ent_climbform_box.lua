@@ -2,16 +2,16 @@
 
 AddCSLuaFile()
 
-ENT.Base				= "base_gmodentity"
-ENT.Type				= "anim"
-ENT.PrintName			= "Climbgame Box"
-ENT.Category			= "Fun + Games"
-ENT.Author				= "MrRangerLP"
-ENT.Contact				= ""
-ENT.Purpose				= ""
-ENT.Instructions		= ""
-ENT.Spawnable			= false
-ENT.AdminOnly			= false
+ENT.Base		= "base_gmodentity"
+ENT.Type		= "anim"
+ENT.PrintName		= "Climbgame Box"
+ENT.Category		= "Fun + Games"
+ENT.Author		= "MrRangerLP"
+ENT.Contact		= ""
+ENT.Purpose		= ""
+ENT.Instructions	= ""
+ENT.Spawnable		= false
+ENT.AdminOnly		= false
 ENT.DisableDuplicator	= true
 
 if SERVER then
@@ -26,7 +26,7 @@ if SERVER then
 			phys:Wake()
 			phys:EnableMotion(false)
 		end
-		
+
 		if self.CPPIExists then
 			if IsValid(self.Owner) then
 				self:CPPISetOwner(self.Owner)
@@ -37,7 +37,7 @@ if SERVER then
 			end
 		end
 	end
-	
+
 	function ENT:EntityTakeDamage() return true end
 	function ENT:PhysgunPickup() return false end
 	function ENT:CanTool() return false end
