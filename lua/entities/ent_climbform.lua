@@ -374,7 +374,7 @@ if SERVER then
 				if not IsValid(v) then self:CallError(); break end
 			end
 
-			if GamerValid and not self.Fell and IsValid(self.LastBox) and self.Gamer:GetPos():Distance(self.LastBox:GetPos()) > (self.BoxSize*4) or (self.Gamer:GetMoveType() == MOVETYPE_NOCLIP) then
+			if not self.Fell and GamerValid and IsValid(self.LastBox) and (self.Gamer:GetPos():Distance(self.LastBox:GetPos()) > (self.BoxSize*4) or (self.Gamer:GetMoveType() == MOVETYPE_NOCLIP or self.Gamer:InVehicle())) then
 				self:SafeEmitSound("vo/npc/barney/ba_downyougo.wav",75,100,1,CHAN_AUTO)
 				self.Fell = true
 				self:SetNWBool("Fell",true)
