@@ -77,14 +77,14 @@ if CLIENT then
 	function ENT:Think()
 		if (self:GetNWBool("Fell") or self:GetNWBool("GameFinished")) and IsValid(self.SharedOwner) and self.SharedOwner == Me then
 			local Count = self:GetNWInt("Climbcount")
-			local CountStr = tostring(Count)
+			local CountStr = "" .. tostring(Count) -- For some reason we have to append this to a string, otherwise it will be invisible in the valve chatbox
 
 			if self:GetNWBool("Fell") then
-				chat.AddText(ColorWhite,"[",ColorOrangeIsh,"Climbgame",ColorWhite,"]: You managed to climb ",ColorOrangeIsh,CountStr,ColorWhite,Count > 1 and " Boxes!" or " Box!")
+				chat.AddText(ColorWhite,"[",ColorOrangeIsh,"Climbgame",ColorWhite,"]: You managed to climb ",ColorOrangeIsh,CountStr,ColorWhite,Count > 1 and " boxes!" or " box!")
 			end
 
 			if self:GetNWBool("GameFinished") then
-				chat.AddText(ColorWhite,"[",ColorOrangeIsh,"Climbgame",ColorWhite,"]: You made it to the top in ",ColorOrangeIsh,CountStr,ColorWhite,Count > 1 and " Boxes!" or " Box!")
+				chat.AddText(ColorWhite,"[",ColorOrangeIsh,"Climbgame",ColorWhite,"]: You made it to the top in ",ColorOrangeIsh,CountStr,ColorWhite,Count > 1 and " boxes!" or " box!")
 			end
 
 			self:SetNextClientThink(CurTime() + 100000) -- We only want this to be displayed once. This method is better than using a variable
