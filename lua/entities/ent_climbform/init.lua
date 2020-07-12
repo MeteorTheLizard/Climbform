@@ -7,9 +7,12 @@ if SERVER then
 	resource.AddFile("materials/vgui/entities/ent_climbform.vtf")
 
 	local angle_zero = Angle(0,0,0) -- Let us not take any chances
+	local vector_zero = Vector(0,0,0)
 	local VectorCache2 = Vector(0,0,25)
 	local VectorCache3 = Vector(0,0,500)
 	local VectorCache4 = Vector(0,0,50)
+	local VectorSetUpCheat = Vector(0,0,20.25)
+	local VectorHeadcrabUpPos = Vector(0,0,30.5)
 	local ColorFadedGreen = Color(0,200,0)
 	local ColorFadedOrange = Color(200,200,0)
 	local ColorOrangeIsh = Color(255,191,0)
@@ -327,7 +330,7 @@ if SERVER then
 				self.Gamer:EmitSound("vo/npc/barney/ba_headhumpers.wav")
 
 				self.Headcrab = ents.Create("npc_headcrab")
-				self.Headcrab:SetPos(self.LastBox:GetPos() + Vector(0,0,30.5))
+				self.Headcrab:SetPos(self.LastBox:GetPos() + VectorHeadcrabUpPos)
 				self.Headcrab:Spawn()
 				self.Headcrab:SetEnemy(self.Gamer) -- I hope this will force the headcrab to engage the player
 
@@ -389,7 +392,7 @@ if SERVER then
 
 		if DevCheatState then
 			self.Gamer:SetVelocity(vector_zero) -- Prevent movement spazzing
-			self.Gamer:SetPos(self.LastBox:GetPos() + Vector(0,0,20.25))
+			self.Gamer:SetPos(self.LastBox:GetPos() + VectorSetUpCheat)
 			self:NextThink(CurTime() + 0.06) -- Gotta go fast
 			return true -- returning true is required for NextThink to work
 		end
