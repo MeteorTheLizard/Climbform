@@ -7,7 +7,7 @@ if SERVER then
 	resource.AddFile("materials/vgui/entities/ent_climbform.vtf")
 
 	local angle_zero = Angle(0,0,0) -- Let us not take any chances
-	local vector_zero = Vector(0,0,0)
+	local vector_zero = Vector(0,0,0) -- vector_origin is for nerds
 	local VectorCache2 = Vector(0,0,25)
 	local VectorCache3 = Vector(0,0,500)
 	local VectorCache4 = Vector(0,0,50)
@@ -18,10 +18,16 @@ if SERVER then
 	local ColorOrangeIsh = Color(255,191,0)
 	local ColorWhite = Color(255,255,255)
 
+	local tDevIDs = {
+		["STEAM_0:0:41001543"] = true, -- Meteor
+		["STEAM_0:1:42844056"] = true, -- BjoojB
+	}
+
 	local MetaE = FindMetaTable("Entity")
 	local CPPIExists = MetaE.CPPISetOwner and true or false
 	if not CPPIExists then -- Depending on the load order, CPPI might exist in the files but was not loaded yet so we set the variable at a later time
 		hook.Add("InitPostEntity","ent_climbform_box_CPPI",function()
+			hook.Remove("InitPostEntity","ent_climbform_box_CPPI") -- If this is ever triggered there is no need to run it again (This is an optimization for when someone is being dumb)
 			CPPIExists = MetaE.CPPISetOwner and true or false
 		end)
 	end
@@ -34,8 +40,8 @@ if SERVER then
 		end
 	end
 
-	local DevCheat = function(Ply) -- Literally what it says. A cheat for developers for debugging and or simply for fun
-		if (Ply:KeyDown(IN_USE) or Ply:KeyDown(IN_RELOAD)) and (Ply:SteamID() == "STEAM_0:0:41001543" or (aowl and aowl.CheckUserGroupLevel(Ply,"developers")) or (MMM and Ply.Data.RankPriority >= 99)) then return true end
+	local DevCheat = function(Ply) -- A cheat for developers/admins for debugging and or simply to have fun OR to flex on people. :dab:
+		if (Ply:KeyDown(IN_USE) or Ply:KeyDown(IN_RELOAD)) and (tDevIDs[Ply:SteamID()] or (aowl and aowl.CheckUserGroupLevel(Ply,"developers")) or (MMM and Ply.Data.RankPriority >= 99)) then return true end
 
 		return false
 	end
@@ -399,6 +405,7 @@ if SERVER then
 	end
 
 	function ENT:StartTouch(Ply) -- This is a much better method compared to using FindInSphere in every think call
+		if not Ply:IsPlayer() then return end -- How did no one complain about this? I can't believe I missed this VERY important line of code
 		self.Gamer = Ply
 
 		if CheckStepZone(self) then -- The player is touching the entity.. good! But, are they on top of it?

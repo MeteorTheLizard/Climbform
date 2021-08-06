@@ -7,7 +7,8 @@ if SERVER then
 	local CPPIExists = MetaE.CPPISetOwner and true or false
 
 	if not CPPIExists then -- Depending on the load order, CPPI might exist in the files but was not loaded yet so we set the variable at a later time
-		hook.Add("InitPostEntity","ent_climbform_box_CPPI",function()
+		hook.Add("InitPostEntity","ent_climbform_box_CPPI_2",function()
+			hook.Remove("InitPostEntity","ent_climbform_box_CPPI_2") -- If this is ever triggered there is no need to run it again (This is an optimization for when someone is being dumb)
 			CPPIExists = MetaE.CPPISetOwner and true or false
 		end)
 	end

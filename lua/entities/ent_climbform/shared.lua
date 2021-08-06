@@ -79,12 +79,14 @@ if CLIENT then
 			local Count = self:GetNWInt("Climbcount")
 			local CountStr = "" .. tostring(Count) -- For some reason we have to append this to a string, otherwise it will be invisible in the valve chatbox
 
-			if self:GetNWBool("Fell") then
-				chat.AddText(ColorWhite,"[",ColorOrangeIsh,"Climbgame",ColorWhite,"]: You managed to climb ",ColorOrangeIsh,CountStr,ColorWhite,Count > 1 and " boxes!" or " box!")
-			end
+			if Count > 0 then -- Do not display any text if we didn't even climb a single box. (Yes, this is possible to trigger)
+				if self:GetNWBool("Fell") then
+					chat.AddText(ColorWhite,"[",ColorOrangeIsh,"Climbgame",ColorWhite,"]: You managed to climb ",ColorOrangeIsh,CountStr,ColorWhite,Count > 1 and " boxes!" or " box!")
+				end
 
-			if self:GetNWBool("GameFinished") then
-				chat.AddText(ColorWhite,"[",ColorOrangeIsh,"Climbgame",ColorWhite,"]: You made it to the top in ",ColorOrangeIsh,CountStr,ColorWhite,Count > 1 and " boxes!" or " box!")
+				if self:GetNWBool("GameFinished") then
+					chat.AddText(ColorWhite,"[",ColorOrangeIsh,"Climbgame",ColorWhite,"]: You made it to the top in ",ColorOrangeIsh,CountStr,ColorWhite,Count > 1 and " boxes!" or " box!")
+				end
 			end
 
 			self:SetNextClientThink(CurTime() + 100000) -- We only want this to be displayed once. This method is better than using a variable
